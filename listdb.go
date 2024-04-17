@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strconv"
 	"sync"
 
@@ -31,6 +32,7 @@ func set_at_index(list *[]string, index int, value string) int {
 }
 
 func (ldb *ListDB) lpush(conn redcon.Conn, cmd redcon.Command) {
+	fmt.Println("pushing...")
 	if len(cmd.Args) != 3 {
 		conn.WriteError("Invalid arguments number for " + string(cmd.Args[0]) + " command")
 		return
@@ -39,8 +41,12 @@ func (ldb *ListDB) lpush(conn redcon.Conn, cmd redcon.Command) {
 	func() {
 		ldb.mu.Lock()
 		defer ldb.mu.Unlock()
-		data, _ := ldb.data[string(cmd.Args[1])]
-		set_at_index(&data, 0, string(cmd.Args[2]))
+		data, exist := ldb.data[string(cmd.Args[1])]
+		if !exist {
+			data = []string{string(cmd.Args[2])}
+		} else {
+			set_at_index(&data, 0, string(cmd.Args[2]))
+		}
 		ldb.data[string(cmd.Args[1])] = data
 	}()
 
@@ -78,6 +84,7 @@ func (ldb *ListDB) get(conn redcon.Conn, cmd redcon.Command) {
 		return
 	}
 	data, ok := ldb.data[string(cmd.Args[1])]
+	fmt.Println(data[index])
 
 	if !ok {
 		conn.WriteNull()

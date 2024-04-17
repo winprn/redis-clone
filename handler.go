@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strconv"
 	"sync"
 	"time"
@@ -30,6 +31,7 @@ func (h *DB) ping(conn redcon.Conn, cmd redcon.Command) {
 }
 
 func (h *DB) set(conn redcon.Conn, cmd redcon.Command) {
+	fmt.Println("Getting set command from" + conn.RemoteAddr())
 	if len(cmd.Args) != 3 {
 		conn.WriteError("Invalid number of arguments for " + string(cmd.Args[0]) + " command")
 	}
@@ -45,6 +47,7 @@ func (h *DB) set(conn redcon.Conn, cmd redcon.Command) {
 }
 
 func (h *DB) get(conn redcon.Conn, cmd redcon.Command) {
+	// fmt.Println("Getting get command from" + conn.RemoteAddr())
 	if len(cmd.Args) != 2 {
 		conn.WriteError("ERR wrong number of arguments for '" + string(cmd.Args[0]) + "' command")
 		return
